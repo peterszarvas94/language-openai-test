@@ -24,6 +24,11 @@ next-env.d.ts
 .DS_Store
 *.pem
 
+# lockfiles
+npm-lock.json*
+yarn.lock*
+pnpm-lock.yaml*
+
 # debug
 npm-debug.log*
 yarn-debug.log*
