@@ -5,7 +5,12 @@ import { openai } from "~/utils/openai";
 
 export const aiRouter = createTRPCRouter({
   getChatCompletion: publicProcedure
-    .input(z.object({ prompt: z.string() }))
+    .input(z.object({
+      messages: z.array(z.object({
+        role: z.enum(["system", "user", "assistant"]),
+        content: z.string(),
+      })),
+    }))
     .mutation(async ({ input }) => {
       console.log("input", input);
 
@@ -13,7 +18,7 @@ export const aiRouter = createTRPCRouter({
         model: "gpt-3.5-turbo-0301",
         messages: [
           { "role": "system", "content": "You are a helpful assistant." },
-          { "role": "user", "content": input.prompt },
+          ...input.messages,
         ]
       })
 
@@ -66,11 +71,12 @@ export const aiRouter = createTRPCRouter({
   getResponse: publicProcedure
     .input(z.object({
       text: z.string(),
+      language: z.string(),
     }))
     .mutation(async ({ input }) => {
       const response = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: `Response to: ${input.text}`,
+        prompt: `Continue the conversation in ${input.language}:\n${input.text}`,
       })
 
       return {

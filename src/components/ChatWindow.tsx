@@ -4,21 +4,23 @@ import UserMessage from "./UserMessage";
 import { IoMdSend } from "react-icons/io";
 import { Message } from "~/utils/message";
 
-function ChatWindow({ language, messages, onSubmit }: {
-  language: string,
+function ChatWindow({ topText, messages, onSubmit }: {
+  topText: string,
   messages: Message[],
   onSubmit: (message: string) => void
 }) {
 
   function renderMessages() {
     const m: JSX.Element[] = [];
-    for (const message of messages) {
-      if (message.sender === "user") {
-        m.push(<UserMessage text={message.text} />);
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      if (!message) continue;
+      if (message.role === "user") {
+        m.push(<UserMessage text={message.content} key={i} />);
         continue;
       }
-      if (message.sender === "bot") {
-        m.push(<BotMessage text={message.text} />);
+      if (message.role === "assistant") {
+        m.push(<BotMessage text={message.content} key={i} />);
         continue;
       }
     }
@@ -27,9 +29,11 @@ function ChatWindow({ language, messages, onSubmit }: {
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const message = (form.querySelector("[role=textbox]") as HTMLDivElement).innerText;
+    const form = e.currentTarget as HTMLFormElement;
+    const textbox = form.querySelector("[role=textbox]") as HTMLDivElement;
+    const message = textbox.innerText;
     onSubmit(message);
+    textbox.innerText = "";
   }
 
   return (
@@ -37,10 +41,9 @@ function ChatWindow({ language, messages, onSubmit }: {
       w-96 bg-white rounded-xl shadow-xl py-2
       flex flex-col gap-2
     ">
-      <div className="text-center">{language}</div>
       <div className="grow">
         <div className="flex justify-center pb-2 px-2 text-sm text-gray-600">
-          Start a conversation by sending a message
+          {topText}
         </div>
         {renderMessages()}
       </div>
