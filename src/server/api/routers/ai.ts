@@ -48,21 +48,33 @@ export const aiRouter = createTRPCRouter({
   getTranslation: publicProcedure
     .input(z.object({
       text: z.string(),
-      language: z.string(),
+      source: z.string(),
+      target: z.string(),
     }))
     .mutation(async ({ input }) => {
       const translation = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: `Translate from english to ${input.language}:\n${input.text}`,
+        prompt: `Translate from ${input.source} to ${input.target}:\n${input.text}`,
         max_tokens: 2048
       })
 
       return {
         translation: translation.data,
       }
+    }),
+
+  getResponse: publicProcedure
+    .input(z.object({
+      text: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `Response to: ${input.text}`,
+      })
+
+      return {
+        response: response.data,
+      }
     })
-
-
-
 })
-
